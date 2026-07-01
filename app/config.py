@@ -21,3 +21,8 @@ PHONE_HASH_SECRET = os.environ.get("PHONE_HASH_SECRET", "change-me-please-dev-on
 PHONE_ENCRYPTION_KEY = os.environ.get("PHONE_ENCRYPTION_KEY")
 
 DEFAULT_COUNTRY_CODE = os.environ.get("DEFAULT_COUNTRY_CODE", "27")
+
+# Timezone the app operates in. Kickoff times are entered and displayed in
+# this zone, and "now" is evaluated in it when deciding whether predictions
+# are locked. Defaults to South African time for the Springbok crew.
+APP_TIMEZONE = os.environ.get("APP_TIMEZONE", "Africa/Johannesburg")

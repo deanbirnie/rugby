@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -10,7 +11,14 @@ from app.database import init_db
 from app.routers import admin, predict, public
 from app.security import NotAuthenticated
 
-app = FastAPI(title=config.APP_NAME)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(title=config.APP_NAME, lifespan=lifespan)
 
 app.add_middleware(SessionMiddleware, secret_key=config.SESSION_SECRET, same_site="lax")
 
@@ -21,11 +29,6 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 @app.exception_handler(NotAuthenticated)
 async def not_authenticated_handler(request: Request, exc: NotAuthenticated):
     return RedirectResponse(url="/admin/login", status_code=303)
-
-
-@app.on_event("startup")
-def on_startup():
-    init_db()
 
 
 app.include_router(public.router)

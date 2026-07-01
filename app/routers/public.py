@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from sqlalchemy import select
@@ -9,6 +7,7 @@ from app.database import get_db
 from app.models import Match
 from app.pot import closest_predictions, get_current_pot, get_leaderboard, get_payout_for_match
 from app.templating import templates
+from app.timeutil import now_local
 
 router = APIRouter()
 
@@ -16,7 +15,7 @@ router = APIRouter()
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request, db: Session = Depends(get_db)):
     pot = get_current_pot(db)
-    now = datetime.utcnow()
+    now = now_local()
     next_match = (
         db.execute(
             select(Match)
@@ -45,7 +44,6 @@ def home(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/matches", response_class=HTMLResponse)
 def matches_list(request: Request, tab: str = "upcoming", db: Session = Depends(get_db)):
-    now = datetime.utcnow()
     if tab == "past":
         matches = (
             db.execute(
@@ -66,7 +64,7 @@ def matches_list(request: Request, tab: str = "upcoming", db: Session = Depends(
             .all()
         )
     return templates.TemplateResponse(
-        request, "matches_list.html", {"matches": matches, "tab": tab, "now": now}
+        request, "matches_list.html", {"matches": matches, "tab": tab}
     )
 
 

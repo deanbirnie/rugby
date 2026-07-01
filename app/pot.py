@@ -61,11 +61,11 @@ def get_payout_for_match(db: Session, match_id: int) -> dict | None:
 
 
 def apply_result(db: Session, match: Match, bok_score: int, opponent_score: int) -> None:
-    from datetime import datetime
+    from app.timeutil import now_local
 
     match.bok_score = bok_score
     match.opponent_score = opponent_score
-    match.result_entered_at = datetime.utcnow()
+    match.result_entered_at = now_local()
 
     for prediction in match.predictions:
         prediction.is_winner = (
