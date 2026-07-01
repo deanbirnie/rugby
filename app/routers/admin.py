@@ -254,6 +254,30 @@ def qr_image(qr_token: str, request: Request, db: Session = Depends(get_db)):
     return Response(content=png, media_type="image/png")
 
 
+@router.get("/matches/{match_id}/poster.pdf", dependencies=[Depends(require_admin)])
+def match_poster(match_id: int, request: Request, db: Session = Depends(get_db)):
+    import re
+
+    from fastapi.responses import Response
+
+    from app.pdf import build_match_poster
+
+    match = db.get(Match, match_id)
+    if match is None:
+        return HTMLResponse("Match not found", status_code=404)
+
+    predict_url = f"{_base_url(request)}/predict/{match.qr_token}"
+    pdf = build_match_poster(match, predict_url)
+
+    slug = re.sub(r"[^a-z0-9]+", "-", match.opponent.lower()).strip("-") or "match"
+    filename = f"bokke-vs-{slug}-{match.kickoff_at:%Y-%m-%d}.pdf"
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="{filename}"'},
+    )
+
+
 @router.get("/players", response_class=HTMLResponse, dependencies=[Depends(require_admin)])
 def players_list(request: Request, db: Session = Depends(get_db)):
     players = db.query(Player).order_by(Player.display_name.asc()).all()
