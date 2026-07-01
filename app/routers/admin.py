@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
+from app import config
 from app.database import get_db
 from app.models import AppSettings, Match, Player, Prediction
 from app.pot import compute_pot_timeline, get_payout_for_match, get_or_create_settings
@@ -15,7 +16,11 @@ router = APIRouter(prefix="/admin")
 
 
 def _base_url(request: Request) -> str:
-    return str(request.base_url).rstrip("/")
+    """Public base URL for links that leave the app (QR codes, posters).
+    BASE_URL wins when configured; the request's own URL is only a fallback
+    since behind a tunnel/proxy it's often an unreachable internal address.
+    """
+    return config.BASE_URL or str(request.base_url).rstrip("/")
 
 
 @router.get("", response_class=HTMLResponse)

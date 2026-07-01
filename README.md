@@ -55,6 +55,11 @@ personal data, and easy to self-host.
    change `APP_TIMEZONE` (any IANA name) if your crew watches from
    elsewhere, since it controls when predictions lock at kickoff.
 
+   Set `BASE_URL` to your public hostname (e.g. your Cloudflare Tunnel
+   domain) — it's baked into the QR codes and printed posters. Without it
+   they fall back to the address the container sees on the request, which
+   is usually an internal IP your friends' phones can't reach.
+
 2. Build and run:
 
    ```bash

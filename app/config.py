@@ -26,3 +26,9 @@ DEFAULT_COUNTRY_CODE = os.environ.get("DEFAULT_COUNTRY_CODE", "27")
 # this zone, and "now" is evaluated in it when deciding whether predictions
 # are locked. Defaults to South African time for the Springbok crew.
 APP_TIMEZONE = os.environ.get("APP_TIMEZONE", "Africa/Johannesburg")
+
+# Public base URL used in QR codes and printed posters (e.g. the Cloudflare
+# Tunnel hostname, https://bokke.example.com). When unset, falls back to the
+# URL of the incoming request — which behind a tunnel/proxy is often an
+# internal IP that phones can't reach, so set this in production.
+BASE_URL = os.environ.get("BASE_URL", "").rstrip("/")
