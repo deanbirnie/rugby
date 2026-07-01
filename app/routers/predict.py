@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -83,17 +84,22 @@ def predict_submit(
         )
 
     phone_hash = hash_phone(normalized)
-    player = db.query(Player).filter(Player.phone_hash == phone_hash).first()
-    if player is None:
-        player = Player(
-            display_name=name,
-            phone_hash=phone_hash,
-            phone_encrypted=encrypt_phone(normalized),
-        )
-        db.add(player)
-        db.flush()
-    else:
-        player.display_name = name
+
+    def upsert_player() -> Player:
+        player = db.query(Player).filter(Player.phone_hash == phone_hash).first()
+        if player is None:
+            player = Player(
+                display_name=name,
+                phone_hash=phone_hash,
+                phone_encrypted=encrypt_phone(normalized),
+            )
+            db.add(player)
+            db.flush()
+        else:
+            player.display_name = name
+        return player
+
+    player = upsert_player()
 
     prediction = (
         db.query(Prediction)
@@ -109,7 +115,27 @@ def predict_submit(
     if paid_now:
         prediction.paid = True
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # Two brand-new submissions for the same phone raced on the unique
+        # phone_hash. Roll back and retry once against the row that won.
+        db.rollback()
+        player = db.query(Player).filter(Player.phone_hash == phone_hash).first()
+        player.display_name = name
+        prediction = (
+            db.query(Prediction)
+            .filter(Prediction.match_id == match.id, Prediction.player_id == player.id)
+            .first()
+        )
+        if prediction is None:
+            prediction = Prediction(match_id=match.id, player_id=player.id)
+            db.add(prediction)
+        prediction.predicted_bok_score = bok_score
+        prediction.predicted_opponent_score = opponent_score
+        if paid_now:
+            prediction.paid = True
+        db.commit()
 
     response = RedirectResponse(url=f"/predict/{qr_token}/success", status_code=303)
     response.set_cookie(COOKIE_NAME, name, max_age=60 * 60 * 24 * 365)

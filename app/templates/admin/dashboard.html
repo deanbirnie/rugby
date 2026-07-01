@@ -42,7 +42,7 @@
   <h2>Past Matches</h2>
   {% if past %}
     {% for m in past %}
-    {% set payout = get_payout_for_match(m.id) %}
+    {% set payout = payouts.get(m.id) %}
     <div class="match-row">
       <div>
         <div class="who">Springboks {{ m.bok_score }} - {{ m.opponent_score }} {{ m.opponent }}</div>

@@ -32,28 +32,28 @@
   </form>
 </div>
 
-{% if match and not match.is_resolved %}
+{% if match %}
 <div class="card">
-  <h2>Enter Result</h2>
+  <h2>{{ 'Correct Result' if match.is_resolved else 'Enter Result' }}</h2>
+  {% if match.is_resolved %}
+    <p class="muted">Current: Springboks {{ match.bok_score }} - {{ match.opponent_score }} {{ match.opponent }}. Re-saving recalculates winners and the pot.</p>
+  {% endif %}
   <form method="post" action="/admin/matches/{{ match.id }}/result">
     <div class="score-row">
       <div class="field">
         <label for="bok_score">Springboks score</label>
-        <input type="number" id="bok_score" name="bok_score" min="0" required>
+        <input type="number" id="bok_score" name="bok_score" min="0" value="{{ match.bok_score if match.is_resolved else '' }}" required>
       </div>
       <div class="field">
         <label for="opponent_score">{{ match.opponent }} score</label>
-        <input type="number" id="opponent_score" name="opponent_score" min="0" required>
+        <input type="number" id="opponent_score" name="opponent_score" min="0" value="{{ match.opponent_score if match.is_resolved else '' }}" required>
       </div>
     </div>
     <button type="submit" class="btn">Save Result &amp; Settle Pot</button>
   </form>
-</div>
-{% elif match and match.is_resolved %}
-<div class="card">
-  <h2>Result</h2>
-  <p>Springboks {{ match.bok_score }} - {{ match.opponent_score }} {{ match.opponent }}</p>
-  <a href="/admin/matches/{{ match.id }}/predictions">View predictions &amp; payout</a>
+  {% if match.is_resolved %}
+    <p style="margin-top:0.8rem;"><a href="/admin/matches/{{ match.id }}/predictions">View predictions &amp; payout</a></p>
+  {% endif %}
 </div>
 {% endif %}
 {% endblock %}

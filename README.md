@@ -50,7 +50,10 @@ personal data, and easy to self-host.
    ```
 
    Set `ADMIN_PASSWORD` to whatever you like — it doesn't need to be
-   fancy, this app isn't protecting anything sensitive.
+   fancy, this app isn't protecting anything sensitive. `APP_TIMEZONE`
+   and `DEFAULT_COUNTRY_CODE` are optional and default to South Africa;
+   change `APP_TIMEZONE` (any IANA name) if your crew watches from
+   elsewhere, since it controls when predictions lock at kickoff.
 
 2. Build and run:
 

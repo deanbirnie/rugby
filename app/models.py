@@ -13,6 +13,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from app.timeutil import now_local
 
 
 def _new_qr_token() -> str:
@@ -32,7 +33,7 @@ class Player(Base):
     # PHONE_ENCRYPTION_KEY secret (e.g. scripts/decrypt_phone.py); never
     # decrypted or shown anywhere in the web UI.
     phone_encrypted: Mapped[str] = mapped_column(String(255))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now_local)
 
     predictions: Mapped[list["Prediction"]] = relationship(back_populates="player")
 
@@ -54,7 +55,7 @@ class Match(Base):
     qr_token: Mapped[str] = mapped_column(
         String(20), unique=True, index=True, default=_new_qr_token
     )
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now_local)
 
     predictions: Mapped[list["Prediction"]] = relationship(
         back_populates="match", cascade="all, delete-orphan"
@@ -67,7 +68,7 @@ class Match(Base):
     @property
     def is_locked(self) -> bool:
         """Predictions can no longer be made or edited."""
-        return self.is_resolved or datetime.utcnow() >= self.kickoff_at
+        return self.is_resolved or now_local() >= self.kickoff_at
 
     @property
     def has_winner(self) -> bool:
@@ -93,9 +94,9 @@ class Prediction(Base):
     paid: Mapped[bool] = mapped_column(Boolean, default=False)
     is_winner: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    submitted_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime, default=now_local)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=now_local, onupdate=now_local
     )
 
     match: Mapped["Match"] = relationship(back_populates="predictions")

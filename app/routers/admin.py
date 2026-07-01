@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import AppSettings, Match, Player, Prediction
-from app.pot import get_current_pot, get_payout_for_match, get_or_create_settings
+from app.pot import compute_pot_timeline, get_payout_for_match, get_or_create_settings
 from app.qr import generate_qr_png
 from app.security import require_admin, verify_admin_password
 from app.templating import templates
@@ -50,9 +50,10 @@ def logout(request: Request):
 
 @router.get("/dashboard", response_class=HTMLResponse, dependencies=[Depends(require_admin)])
 def dashboard(request: Request, db: Session = Depends(get_db)):
-    pot = get_current_pot(db)
     settings = get_or_create_settings(db)
-    now = datetime.utcnow()
+    # Compute the pot timeline once; it yields both the current pot and the
+    # per-match payout map, avoiding an O(N^2) recompute per past match.
+    payouts, pot = compute_pot_timeline(db)
     upcoming = (
         db.query(Match)
         .filter(Match.bok_score.is_(None))
@@ -73,8 +74,7 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
             "settings": settings,
             "upcoming": upcoming,
             "past": past,
-            "now": now,
-            "get_payout_for_match": lambda m_id: get_payout_for_match(db, m_id),
+            "payouts": payouts,
         },
     )
 
