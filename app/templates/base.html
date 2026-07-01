@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Bokke Predictions{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="/static/js/htmx.min.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <a class="logo" href="/">Bokke <span class="accent">Predictions</span></a>
+    </div>
+    <nav class="main-nav">
+      <a href="/">Home</a>
+      <a href="/matches">Matches</a>
+      <a href="/leaderboard">Leaderboard</a>
+      <a href="/admin">Admin</a>
+    </nav>
+  </header>
+  <main>
+    {% if request.query_params.get('msg') %}
+      <div class="flash {{ 'error' if request.query_params.get('type') == 'error' else '' }}">
+        {{ request.query_params.get('msg') }}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

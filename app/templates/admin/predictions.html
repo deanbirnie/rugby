@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Predictions - {{ match.opponent }}{% endblock %}
+{% block content %}
+<h1>Predictions: Springboks vs {{ match.opponent }}</h1>
+<p class="muted">{{ match.kickoff_at.strftime('%a %d %b %Y, %H:%M') }} &middot; Buy-in R{{ "%.2f"|format(match.buy_in_amount) }}</p>
+
+{% if match.is_resolved %}
+  <div class="card">
+    <p><strong>Final score:</strong> Springboks {{ match.bok_score }} - {{ match.opponent_score }} {{ match.opponent }}</p>
+    {% if payout %}
+      <p><span class="badge win">Pot Won</span> Total R{{ "%.2f"|format(payout.payout_total) }} split {{ payout.winners|length }} way{{ 's' if payout.winners|length != 1 else '' }}: R{{ "%.2f"|format(payout.per_winner) }} each</p>
+      <p class="muted">This payout figure is admin-only and is never shown on the public site.</p>
+    {% endif %}
+  </div>
+{% endif %}
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Predictor</th><th>Prediction</th>{% if match.is_resolved %}<th>Off by</th>{% endif %}<th>Paid</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for prediction in predictions %}
+      <tr class="{{ 'winner-row' if prediction.is_winner else '' }}">
+        <td>{{ prediction.player.display_name }}{% if prediction.is_winner %} <span class="badge win">Winner</span>{% endif %}</td>
+        <td>{{ prediction.predicted_bok_score }} - {{ prediction.predicted_opponent_score }}</td>
+        {% if match.is_resolved %}<td>{{ prediction.diff }}</td>{% endif %}
+        <td>{% include "admin/_paid_toggle.html" %}</td>
+      </tr>
+      {% endfor %}
+      {% if not predictions %}
+      <tr><td colspan="4" class="muted">No predictions yet.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

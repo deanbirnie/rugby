@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Settings - Bokke Predictions{% endblock %}
+{% block content %}
+<h1>Settings</h1>
+<div class="card">
+  <form method="post" action="/admin/settings">
+    <div class="field">
+      <label for="starting_pot_balance">Starting/carry-over pot balance (R)</label>
+      <input type="number" id="starting_pot_balance" name="starting_pot_balance" step="0.01" min="0" value="{{ settings.starting_pot_balance }}">
+      <p class="muted" style="font-size:0.8rem;">Use this to seed the pot with cash carried over from before this app was used, or to manually correct the running total. It's added on top of tracked buy-ins until the next time someone wins the pot.</p>
+    </div>
+    <button type="submit" class="btn gold">Save</button>
+  </form>
+</div>
+{% endblock %}

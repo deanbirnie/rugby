@@ -1,0 +1,5 @@
+<button
+  class="btn small {{ 'secondary' if prediction.paid else 'gold' }}"
+  hx-post="/admin/predictions/{{ prediction.id }}/toggle-paid"
+  hx-swap="outerHTML"
+>{{ 'Paid ✓' if prediction.paid else 'Mark Paid' }}</button>

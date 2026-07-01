@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}QR - {{ match.opponent }}{% endblock %}
+{% block content %}
+<div class="qr-print card">
+  <h1>Springboks vs {{ match.opponent }}</h1>
+  <p class="muted">{{ match.kickoff_at.strftime('%a %d %b %Y, %H:%M') }}{% if match.venue %} &middot; {{ match.venue }}{% endif %}</p>
+  <img src="/admin/qr/{{ match.qr_token }}.png" alt="QR code to predict">
+  <p>Scan to leave your prediction!</p>
+  {% if match.buy_in_amount %}<p><strong>Buy-in: R{{ "%.2f"|format(match.buy_in_amount) }}</strong></p>{% endif %}
+  <p class="muted" style="font-size:0.8rem;">{{ predict_url }}</p>
+  <button class="btn gold no-print" onclick="window.print()">Print</button>
+  <a class="btn secondary no-print" href="/admin/dashboard">Back to Dashboard</a>
+</div>
+{% endblock %}

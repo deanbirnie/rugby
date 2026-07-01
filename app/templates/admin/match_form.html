@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Match' if match else 'Add Match' }} - Bokke Predictions{% endblock %}
+{% block content %}
+<h1>{{ 'Edit Match' if match else 'Add Match' }}</h1>
+
+{% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+
+<div class="card">
+  <form method="post" action="{{ '/admin/matches/%d/edit'|format(match.id) if match else '/admin/matches/new' }}">
+    <div class="field">
+      <label for="opponent">Opponent</label>
+      <input type="text" id="opponent" name="opponent" value="{{ match.opponent if match else '' }}" placeholder="e.g. New Zealand" required>
+    </div>
+    <div class="field">
+      <label for="competition">Competition (optional)</label>
+      <input type="text" id="competition" name="competition" value="{{ match.competition if match else '' }}" placeholder="e.g. Rugby Championship">
+    </div>
+    <div class="field">
+      <label for="venue">Venue (optional)</label>
+      <input type="text" id="venue" name="venue" value="{{ match.venue if match else '' }}" placeholder="e.g. Loftus Versfeld">
+    </div>
+    <div class="field">
+      <label for="kickoff_at">Kickoff date &amp; time</label>
+      <input type="datetime-local" id="kickoff_at" name="kickoff_at" value="{{ match.kickoff_at.strftime('%Y-%m-%dT%H:%M') if match else '' }}" required>
+    </div>
+    <div class="field">
+      <label for="buy_in_amount">Buy-in amount (R) per prediction</label>
+      <input type="number" id="buy_in_amount" name="buy_in_amount" step="0.01" min="0" value="{{ match.buy_in_amount if match else '0' }}" {{ 'disabled' if match and match.is_resolved else '' }}>
+      {% if match and match.is_resolved %}<p class="muted" style="font-size:0.8rem;">Locked - result already entered.</p>{% endif %}
+    </div>
+    <button type="submit" class="btn gold">{{ 'Save Changes' if match else 'Create Match' }}</button>
+  </form>
+</div>
+
+{% if match and not match.is_resolved %}
+<div class="card">
+  <h2>Enter Result</h2>
+  <form method="post" action="/admin/matches/{{ match.id }}/result">
+    <div class="score-row">
+      <div class="field">
+        <label for="bok_score">Springboks score</label>
+        <input type="number" id="bok_score" name="bok_score" min="0" required>
+      </div>
+      <div class="field">
+        <label for="opponent_score">{{ match.opponent }} score</label>
+        <input type="number" id="opponent_score" name="opponent_score" min="0" required>
+      </div>
+    </div>
+    <button type="submit" class="btn">Save Result &amp; Settle Pot</button>
+  </form>
+</div>
+{% elif match and match.is_resolved %}
+<div class="card">
+  <h2>Result</h2>
+  <p>Springboks {{ match.bok_score }} - {{ match.opponent_score }} {{ match.opponent }}</p>
+  <a href="/admin/matches/{{ match.id }}/predictions">View predictions &amp; payout</a>
+</div>
+{% endif %}
+{% endblock %}

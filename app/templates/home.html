@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Bokke Predictions{% endblock %}
+{% block content %}
+<div class="pot-hero">
+  <div class="pot-label">Current Pot</div>
+  <div class="pot-value">R{{ "%.2f"|format(pot) }}</div>
+  <div class="muted" style="color:#fff;opacity:0.85;">Winner takes it all with an exact score prediction</div>
+</div>
+
+{% if next_match %}
+<div class="card">
+  <h2>Next Match</h2>
+  <div class="match-row">
+    <div>
+      <div class="who">Springboks vs {{ next_match.opponent }}</div>
+      <div class="when">{{ next_match.kickoff_at.strftime('%a %d %b %Y, %H:%M') }}{% if next_match.venue %} &middot; {{ next_match.venue }}{% endif %}</div>
+    </div>
+    <a class="btn gold" href="/predict/{{ next_match.qr_token }}">Predict</a>
+  </div>
+  {% if next_match.buy_in_amount %}
+  <p class="muted">Buy-in: R{{ "%.2f"|format(next_match.buy_in_amount) }} per prediction</p>
+  {% endif %}
+</div>
+{% else %}
+<div class="card center muted">No upcoming matches scheduled yet.</div>
+{% endif %}
+
+<div class="card">
+  <div class="row-between">
+    <h2 style="margin:0">Recent Results</h2>
+    <a href="/matches?tab=past">See all &rarr;</a>
+  </div>
+  {% if recent_matches %}
+    {% for m in recent_matches %}
+    <div class="match-row">
+      <div>
+        <div class="who">Springboks {{ m.bok_score }} - {{ m.opponent_score }} {{ m.opponent }}</div>
+        <div class="when">{{ m.kickoff_at.strftime('%d %b %Y') }}{% if m.has_winner %} &middot; <span class="badge win">Pot Won!</span>{% endif %}</div>
+      </div>
+      <a class="btn secondary small" href="/matches/{{ m.id }}">View</a>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">No results yet.</p>
+  {% endif %}
+</div>
+
+<div class="stack" style="flex-direction: row; gap: 1rem;">
+  <a class="btn secondary" href="/matches">Upcoming Matches</a>
+  <a class="btn secondary" href="/leaderboard">Leaderboard</a>
+</div>
+{% endblock %}
