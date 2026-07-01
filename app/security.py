@@ -25,14 +25,29 @@ def require_admin(request: Request) -> None:
 def normalize_phone(raw: str) -> str:
     """Collapse a human-entered phone number down to bare digits with a
     country code, so the same person's number always matches regardless of
-    spacing, dashes, +27 vs 0 prefixes, etc.
+    how they typed it: 082 123 4567, +27 82 123 4567, 0027821234567 and
+    821234567 all normalize to 27821234567.
     """
     digits = re.sub(r"\D", "", raw or "")
+    cc = config.DEFAULT_COUNTRY_CODE
     if digits.startswith("00"):
         digits = digits[2:]
     if digits.startswith("0") and len(digits) == 10:
-        digits = config.DEFAULT_COUNTRY_CODE + digits[1:]
+        digits = cc + digits[1:]
+    elif digits.startswith(cc + "0") and len(digits) == len(cc) + 10:
+        # "+27 (0)82 123 4567" style: drop the redundant 0 after the code.
+        digits = cc + digits[len(cc) + 1 :]
+    elif len(digits) == 9 and not digits.startswith("0"):
+        # Local number typed without the leading 0 or country code.
+        digits = cc + digits
     return digits
+
+
+def is_valid_sa_cell(normalized_phone: str) -> bool:
+    """True if a normalized number looks like a South African cellphone:
+    country code 27 followed by 9 digits, the first of which is never 0.
+    """
+    return re.fullmatch(r"27[1-9]\d{8}", normalized_phone) is not None
 
 
 @lru_cache

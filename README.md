@@ -132,8 +132,11 @@ run `uv add <package>` (or edit `pyproject.toml`) and commit the updated
    buy-in amount for that match.
 3. You're redirected to a printable QR page (`/admin/matches/{id}/qr`) —
    print it and stick it up wherever you're watching the game.
-4. People scan the QR, type their name + cellphone number + score
-   prediction, and optionally tick "I'm paying now".
+4. People scan the QR and enter their cellphone number (0- and +27-style
+   numbers are treated as the same). If the number is recognised they're
+   greeted by name and go straight to their prediction — first-timers are
+   asked for their name once. Then they enter their score and optionally
+   tick "I'm paying now".
 5. Before or after the match, use **Predictions** on the match to tick off
    who's paid, if they didn't pay at prediction time.
 6. After the match, enter the final score. Anyone with an exact match is
