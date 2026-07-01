@@ -8,7 +8,8 @@
   <p>Scan to leave your prediction!</p>
   {% if match.buy_in_amount %}<p><strong>Buy-in: R{{ "%.2f"|format(match.buy_in_amount) }}</strong></p>{% endif %}
   <p class="muted" style="font-size:0.8rem;">{{ predict_url }}</p>
-  <button class="btn gold no-print" onclick="window.print()">Print</button>
+  <a class="btn gold no-print" href="/admin/matches/{{ match.id }}/poster.pdf" target="_blank">Download A4 Poster (PDF)</a>
+  <button class="btn secondary no-print" onclick="window.print()">Print this page</button>
   <a class="btn secondary no-print" href="/admin/dashboard">Back to Dashboard</a>
 </div>
 {% endblock %}
