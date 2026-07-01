@@ -142,41 +142,35 @@ def predict_submit(
             request, db, match, normalized, player, error=error, status_code=400
         )
 
-    if player is None:
-        player = Player(
-            display_name=name,
-            phone_hash=hash_phone(normalized),
-            phone_encrypted=encrypt_phone(normalized),
-        )
-        db.add(player)
-        db.flush()
+    def save(player: Player | None) -> None:
+        if player is None:
+            player = Player(
+                display_name=name,
+                phone_hash=hash_phone(normalized),
+                phone_encrypted=encrypt_phone(normalized),
+            )
+            db.add(player)
+            db.flush()
 
-    prediction = _find_prediction(db, match, player)
-    if prediction is None:
-        prediction = Prediction(match_id=match.id, player_id=player.id)
-        db.add(prediction)
-
-    prediction.predicted_bok_score = bok_score
-    prediction.predicted_opponent_score = opponent_score
-    if paid_now:
-        prediction.paid = True
-
-    try:
-        db.commit()
-    except IntegrityError:
-        # Two brand-new submissions for the same phone raced on the unique
-        # phone_hash. Roll back and retry once against the row that won.
-        db.rollback()
-        player = _find_player(db, normalized)
         prediction = _find_prediction(db, match, player)
         if prediction is None:
             prediction = Prediction(match_id=match.id, player_id=player.id)
             db.add(prediction)
+
         prediction.predicted_bok_score = bok_score
         prediction.predicted_opponent_score = opponent_score
         if paid_now:
             prediction.paid = True
         db.commit()
+
+    try:
+        save(player)
+    except IntegrityError:
+        # Two concurrent submissions raced on a unique constraint (a new
+        # player's phone_hash at flush time, or the same player's prediction
+        # row at commit). Roll back and retry once against the rows that won.
+        db.rollback()
+        save(_find_player(db, normalized))
 
     response = RedirectResponse(url=f"/predict/{qr_token}/success", status_code=303)
     response.set_cookie(COOKIE_PHONE, normalized, max_age=60 * 60 * 24 * 365)
