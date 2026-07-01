@@ -195,6 +195,35 @@ form .checkbox-field label { margin: 0; font-weight: 500; }
 .stack { display: flex; flex-direction: column; gap: 0.6rem; }
 .row-between { display: flex; justify-content: space-between; align-items: center; }
 
+.score-calc {
+  margin: 0 0 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--radius);
+  background: #fafaf7;
+}
+.score-calc summary {
+  cursor: pointer;
+  padding: 0.6rem 0.9rem;
+  font-weight: 700;
+  color: var(--bok-green);
+  list-style-position: inside;
+}
+.score-calc summary:hover { color: var(--bok-green-dark); }
+.score-calc > *:not(summary) { margin-left: 0.9rem; margin-right: 0.9rem; }
+.score-calc[open] { padding-bottom: 0.7rem; }
+.calc-teams { display: flex; flex-wrap: wrap; gap: 1rem; }
+.calc-team { flex: 1 1 240px; }
+.calc-team h3 { margin: 0.2rem 0 0.5rem; font-size: 1rem; }
+.calc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+.calc-grid .field { margin-bottom: 0; }
+.calc-grid label { font-size: 0.8rem; }
+.calc-summary { margin: 0.6rem 0 0; font-size: 0.9rem; }
+.calc-warn { color: var(--bok-danger); font-size: 0.8rem; }
+
 .qr-print {
   text-align: center;
   padding: 2rem;

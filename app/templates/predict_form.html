@@ -46,6 +46,39 @@
           <input type="number" id="opponent_score" name="opponent_score" min="0" value="{{ existing.predicted_opponent_score if existing else '' }}" required>
         </div>
       </div>
+
+      <details class="score-calc">
+        <summary>&#129518; Score Calculator</summary>
+        <p class="muted" style="font-size:0.8rem;">Enter how you think each team will score and we'll tally the points for you: try 5, conversion 2, penalty 3, drop goal 3.</p>
+        <div class="calc-teams">
+          {% for team in [("bok", "Springboks", "bok_score"), ("opp", match.opponent, "opponent_score")] %}
+          <div class="calc-team" data-target="{{ team[2] }}">
+            <h3>{{ team[1] }}</h3>
+            <div class="calc-grid">
+              <div class="field">
+                <label for="calc-{{ team[0] }}-tries">Tries &times;5</label>
+                <input type="number" id="calc-{{ team[0] }}-tries" min="0" inputmode="numeric" placeholder="0" data-points="5" data-kind="tries">
+              </div>
+              <div class="field">
+                <label for="calc-{{ team[0] }}-conv">Conversions &times;2</label>
+                <input type="number" id="calc-{{ team[0] }}-conv" min="0" inputmode="numeric" placeholder="0" data-points="2" data-kind="conversions">
+              </div>
+              <div class="field">
+                <label for="calc-{{ team[0] }}-pen">Penalties &times;3</label>
+                <input type="number" id="calc-{{ team[0] }}-pen" min="0" inputmode="numeric" placeholder="0" data-points="3" data-kind="penalties">
+              </div>
+              <div class="field">
+                <label for="calc-{{ team[0] }}-drop">Drop goals &times;3</label>
+                <input type="number" id="calc-{{ team[0] }}-drop" min="0" inputmode="numeric" placeholder="0" data-points="3" data-kind="dropgoals">
+              </div>
+            </div>
+            <p class="calc-summary">Total: <strong class="calc-total">0</strong> points
+              <span class="calc-warn" hidden>&mdash; more conversions than tries?</span>
+            </p>
+          </div>
+          {% endfor %}
+        </div>
+      </details>
       {% if existing and existing.paid %}
       <div class="field"><span class="badge paid">Buy-in paid &#10003;</span></div>
       {% else %}
@@ -60,5 +93,6 @@
       {% if player %}Not {{ player.display_name }}? {% endif %}<a href="/predict/{{ match.qr_token }}">Use a different number</a>
     </p>
   </div>
+  <script src="/static/js/score_calc.js" defer></script>
 {% endif %}
 {% endblock %}
