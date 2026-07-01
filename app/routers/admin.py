@@ -111,7 +111,7 @@ def new_match_submit(
         competition=competition.strip() or None,
         venue=venue.strip() or None,
         kickoff_at=kickoff_dt,
-        buy_in_amount=buy_in_amount,
+        buy_in_amount=max(0.0, buy_in_amount),
     )
     db.add(match)
     db.commit()
@@ -163,7 +163,7 @@ def edit_match_submit(
     match.venue = venue.strip() or None
     match.kickoff_at = kickoff_dt
     if not match.is_resolved:
-        match.buy_in_amount = buy_in_amount
+        match.buy_in_amount = max(0.0, buy_in_amount)
     db.commit()
     return RedirectResponse(url="/admin/dashboard?msg=Match updated", status_code=303)
 
@@ -183,6 +183,11 @@ def enter_result(
     match = db.get(Match, match_id)
     if match is None:
         return HTMLResponse("Match not found", status_code=404)
+    if bok_score < 0 or opponent_score < 0:
+        return RedirectResponse(
+            url=f"/admin/matches/{match_id}/edit?msg=Scores can't be negative&type=error",
+            status_code=303,
+        )
 
     apply_result(db, match, bok_score, opponent_score)
     return RedirectResponse(
@@ -312,6 +317,6 @@ def settings_submit(
     if settings is None:
         settings = AppSettings(id=1)
         db.add(settings)
-    settings.starting_pot_balance = starting_pot_balance
+    settings.starting_pot_balance = max(0.0, starting_pot_balance)
     db.commit()
     return RedirectResponse(url="/admin/dashboard?msg=Settings saved", status_code=303)

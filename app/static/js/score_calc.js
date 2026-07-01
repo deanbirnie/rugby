@@ -5,7 +5,7 @@
     var total = 0;
     var counts = {};
     block.querySelectorAll("[data-points]").forEach(function (input) {
-      var n = parseInt(input.value, 10) || 0;
+      var n = Math.max(0, parseInt(input.value, 10) || 0);
       total += n * parseInt(input.dataset.points, 10);
       counts[input.dataset.kind] = n;
     });
