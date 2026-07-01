@@ -68,6 +68,46 @@ personal data, and easy to self-host.
 3. Point your Cloudflare Tunnel at `http://localhost:8000` (or the container
    name `bokke-predictions` if the tunnel runs in the same Docker network).
 
+### Using the published image instead of building locally
+
+Every push to `main` builds and publishes an image to GitHub Container
+Registry via `.github/workflows/docker-publish.yml` — no need to `git clone`
+or build on the server itself. The image is at
+`ghcr.io/deanbirnie/rugby:latest` (also tagged with the short commit SHA,
+e.g. `ghcr.io/deanbirnie/rugby:sha-1a2b3c4`, if you want to pin a specific
+build).
+
+**One-time setup:** the package is private by default the first time the
+workflow runs. Go to the package's page on GitHub (Profile → Packages →
+`rugby`) → **Package settings** → change visibility to **Public**, so your
+server can `docker pull` without authenticating.
+
+Then, on the server, use a compose file that pulls instead of builds:
+
+```yaml
+services:
+  bokke-predictions:
+    image: ghcr.io/deanbirnie/rugby:latest
+    container_name: bokke-predictions
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - bokke-data:/app/data
+
+volumes:
+  bokke-data:
+```
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+Re-running those two commands after a merge to `main` (once the workflow
+has finished) picks up the new image.
+
 ### Without Docker (local dev with uv)
 
 Install [uv](https://docs.astral.sh/uv/getting-started/installation/) if you
