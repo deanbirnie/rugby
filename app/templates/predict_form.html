@@ -13,35 +13,52 @@
 {% else %}
   <div class="card">
     {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+
+    {% if player %}
+      <h2 style="margin-top:0;">Howzit, {{ player.display_name }}! &#128075;</h2>
+      {% if existing %}
+        <p class="muted">You've already predicted <strong>{{ existing.predicted_bok_score }} - {{ existing.predicted_opponent_score }}</strong> for this match. Submitting again will update it.</p>
+      {% endif %}
+    {% else %}
+      <h2 style="margin-top:0;">First time? Welcome!</h2>
+      <p class="muted">We don't recognise that number yet &mdash; tell us your name and you're in.</p>
+    {% endif %}
+
     {% if match.buy_in_amount %}
       <p class="muted">Buy-in: <strong>R{{ "%.2f"|format(match.buy_in_amount) }}</strong> per prediction &middot; {{ entry_count }} entered so far</p>
     {% endif %}
+
     <form method="post" action="/predict/{{ match.qr_token }}">
+      <input type="hidden" name="phone" value="{{ phone }}">
+      {% if not player %}
       <div class="field">
         <label for="name">Your name</label>
-        <input type="text" id="name" name="name" value="{{ saved_name }}" required>
+        <input type="text" id="name" name="name" placeholder="e.g. Dean" required autofocus>
       </div>
-      <div class="field">
-        <label for="phone">Cellphone number</label>
-        <input type="tel" id="phone" name="phone" value="{{ saved_phone }}" placeholder="082 123 4567" required>
-        <p class="muted" style="font-size:0.8rem;margin-top:0.3rem;">Only used to recognise you across matches for the leaderboard. Never shown publicly.</p>
-      </div>
+      {% endif %}
       <div class="score-row">
         <div class="field">
           <label for="bok_score">Springboks score</label>
-          <input type="number" id="bok_score" name="bok_score" min="0" required>
+          <input type="number" id="bok_score" name="bok_score" min="0" value="{{ existing.predicted_bok_score if existing else '' }}" required>
         </div>
         <div class="field">
           <label for="opponent_score">{{ match.opponent }} score</label>
-          <input type="number" id="opponent_score" name="opponent_score" min="0" required>
+          <input type="number" id="opponent_score" name="opponent_score" min="0" value="{{ existing.predicted_opponent_score if existing else '' }}" required>
         </div>
       </div>
+      {% if existing and existing.paid %}
+      <div class="field"><span class="badge paid">Buy-in paid &#10003;</span></div>
+      {% else %}
       <div class="field checkbox-field">
         <input type="checkbox" id="paid_now" name="paid_now" value="true">
         <label for="paid_now">I'm paying my buy-in now</label>
       </div>
-      <button type="submit" class="btn gold">Submit Prediction</button>
+      {% endif %}
+      <button type="submit" class="btn gold">{{ 'Update Prediction' if existing else 'Submit Prediction' }}</button>
     </form>
+    <p class="muted" style="font-size:0.85rem; margin-top:0.8rem;">
+      {% if player %}Not {{ player.display_name }}? {% endif %}<a href="/predict/{{ match.qr_token }}">Use a different number</a>
+    </p>
   </div>
 {% endif %}
 {% endblock %}

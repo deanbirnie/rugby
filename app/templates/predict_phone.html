@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Predict: Springboks vs {{ match.opponent }}{% endblock %}
+{% block content %}
+<h1>Springboks vs {{ match.opponent }}</h1>
+<p class="muted">{{ match.kickoff_at.strftime('%a %d %b %Y, %H:%M') }}{% if match.venue %} &middot; {{ match.venue }}{% endif %}</p>
+
+{% if match.is_locked %}
+  <div class="card center">
+    <p><span class="badge locked">Predictions closed</span></p>
+    <p class="muted">Kickoff has passed for this match.</p>
+    <a class="btn secondary" href="/matches/{{ match.id }}">View match</a>
+  </div>
+{% else %}
+  <div class="card">
+    {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+    {% if match.buy_in_amount %}
+      <p class="muted">Buy-in: <strong>R{{ "%.2f"|format(match.buy_in_amount) }}</strong> per prediction &middot; {{ entry_count }} entered so far</p>
+    {% endif %}
+    <form method="post" action="/predict/{{ match.qr_token }}/identify">
+      <div class="field">
+        <label for="phone">Your cellphone number</label>
+        <input type="tel" id="phone" name="phone" value="{{ phone }}" placeholder="082 123 4567" autocomplete="tel" required autofocus>
+        <p class="muted" style="font-size:0.8rem;margin-top:0.3rem;">South African numbers only &mdash; 082 123 4567 and +27 82 123 4567 both work. Only used to recognise you across matches for the leaderboard. Never shown publicly.</p>
+      </div>
+      <button type="submit" class="btn gold">Continue</button>
+    </form>
+  </div>
+{% endif %}
+{% endblock %}
