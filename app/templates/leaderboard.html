@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard - Bokke Predictions{% endblock %}
+{% block content %}
+<h1>Season Leaderboard</h1>
+<p class="muted">Ranked by most wins, then closest average score over the season.</p>
+<div class="card">
+  {% if rows %}
+  <table>
+    <thead><tr><th>#</th><th>Predictor</th><th>Wins</th><th>Predictions</th><th>Avg. off by</th></tr></thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ r.player.display_name }}{% if r.wins > 0 %} <span class="badge win">{{ r.wins }} win{{ 's' if r.wins != 1 else '' }}</span>{% endif %}</td>
+        <td>{{ r.wins }}</td>
+        <td>{{ r.predictions_count }}</td>
+        <td>{{ "%.1f"|format(r.avg_diff) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">No results yet this season.</p>
+  {% endif %}
+</div>
+{% endblock %}

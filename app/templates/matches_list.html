@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Matches - Bokke Predictions{% endblock %}
+{% block content %}
+<h1>Matches</h1>
+<div class="stack" style="flex-direction: row; margin-bottom: 1rem;">
+  <a class="btn {{ 'secondary' if tab != 'upcoming' else '' }}" href="/matches?tab=upcoming">Upcoming</a>
+  <a class="btn {{ 'secondary' if tab != 'past' else '' }}" href="/matches?tab=past">Past</a>
+</div>
+
+<div class="card">
+  {% if matches %}
+    {% for m in matches %}
+    <div class="match-row">
+      <div>
+        <div class="who">Springboks {% if m.is_resolved %}{{ m.bok_score }} - {{ m.opponent_score }}{% else %}vs{% endif %} {{ m.opponent }}</div>
+        <div class="when">
+          {{ m.kickoff_at.strftime('%a %d %b %Y, %H:%M') }}{% if m.venue %} &middot; {{ m.venue }}{% endif %}
+          {% if m.has_winner %} &middot; <span class="badge win">Pot Won!</span>{% endif %}
+        </div>
+      </div>
+      {% if tab == 'upcoming' %}
+        {% if m.is_locked %}
+          <span class="badge locked">Closed</span>
+        {% else %}
+          <a class="btn gold small" href="/predict/{{ m.qr_token }}">Predict</a>
+        {% endif %}
+      {% else %}
+        <a class="btn secondary small" href="/matches/{{ m.id }}">View</a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">No {{ tab }} matches.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Springboks vs {{ match.opponent }} - Bokke Predictions{% endblock %}
+{% block content %}
+<h1>Springboks vs {{ match.opponent }}</h1>
+<p class="muted">{{ match.kickoff_at.strftime('%a %d %b %Y, %H:%M') }}{% if match.venue %} &middot; {{ match.venue }}{% endif %}{% if match.competition %} &middot; {{ match.competition }}{% endif %}</p>
+
+{% if match.is_resolved %}
+  <div class="card center">
+    <h2 style="margin-bottom:0;">Final Score</h2>
+    <div style="font-size:2rem; font-weight:800;">Springboks {{ match.bok_score }} - {{ match.opponent_score }} {{ match.opponent }}</div>
+    {% if payout %}
+      <p><span class="badge win">Pot Won!</span> {{ payout.winners|length }} predictor{{ 's' if payout.winners|length != 1 else '' }} nailed the exact score.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Predictions &mdash; Closest First</h2>
+    <table>
+      <thead><tr><th>Predictor</th><th>Prediction</th><th>Off by</th><th></th></tr></thead>
+      <tbody>
+        {% for p in predictions %}
+        <tr class="{{ 'winner-row' if p.is_winner else '' }}">
+          <td>{{ p.player.display_name }}</td>
+          <td>{{ p.predicted_bok_score }} - {{ p.predicted_opponent_score }}</td>
+          <td>{{ p.diff }}</td>
+          <td>
+            {% if p.is_winner %}<span class="badge win">Winner!</span>
+            {% elif loop.first %}<span class="badge open">Closest</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="card">
+    {% if match.is_locked %}
+      <p><span class="badge locked">Predictions closed</span> Kickoff has passed &mdash; result not entered yet.</p>
+    {% else %}
+      <p><a class="btn gold" href="/predict/{{ match.qr_token }}">Leave your prediction</a></p>
+    {% endif %}
+    <p class="muted">{{ entry_count }} prediction{{ 's' if entry_count != 1 else '' }} so far
+      {% if match.buy_in_amount %} &middot; Buy-in R{{ "%.2f"|format(match.buy_in_amount) }}{% endif %}
+    </p>
+    <p class="muted">Other people's predictions are kept under wraps until the match is played.</p>
+  </div>
+{% endif %}
+{% endblock %}

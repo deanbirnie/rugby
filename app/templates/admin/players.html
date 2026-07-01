@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Players - Bokke Predictions{% endblock %}
+{% block content %}
+<h1>Players</h1>
+<p class="muted">Rename a player if a nickname/typo created a duplicate-looking entry. Renaming just changes their display name &mdash; identity is still tracked by their cellphone number behind the scenes.</p>
+<div class="card">
+  <table>
+    <thead><tr><th>Name</th><th>Predictions</th><th>Rename</th></tr></thead>
+    <tbody>
+      {% for player in players %}
+      <tr>
+        <td>{{ player.display_name }}</td>
+        <td>{{ player.predictions|length }}</td>
+        <td>
+          <form method="post" action="/admin/players/{{ player.id }}/rename" style="display:flex; gap:0.4rem;">
+            <input type="text" name="display_name" value="{{ player.display_name }}" style="width:auto;">
+            <button type="submit" class="btn secondary small">Save</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

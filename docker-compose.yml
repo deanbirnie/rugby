@@ -1,0 +1,14 @@
+services:
+  bokke-predictions:
+    build: .
+    container_name: bokke-predictions
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - bokke-data:/app/data
+
+volumes:
+  bokke-data:

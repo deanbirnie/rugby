@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard - Bokke Predictions{% endblock %}
+{% block content %}
+<div class="row-between">
+  <h1>Admin Dashboard</h1>
+  <form method="post" action="/admin/logout" class="no-print"><button class="btn secondary small" type="submit">Log out</button></form>
+</div>
+
+<div class="pot-hero">
+  <div class="pot-label">Current Pot</div>
+  <div class="pot-value">R{{ "%.2f"|format(pot) }}</div>
+</div>
+
+<div class="stack" style="flex-direction: row; margin-bottom: 1rem;">
+  <a class="btn gold" href="/admin/matches/new">+ Add Match</a>
+  <a class="btn secondary" href="/admin/players">Players</a>
+  <a class="btn secondary" href="/admin/settings">Settings</a>
+</div>
+
+<div class="card">
+  <h2>Upcoming Matches</h2>
+  {% if upcoming %}
+    {% for m in upcoming %}
+    <div class="match-row">
+      <div>
+        <div class="who">vs {{ m.opponent }}</div>
+        <div class="when">{{ m.kickoff_at.strftime('%a %d %b %Y, %H:%M') }} &middot; Buy-in R{{ "%.2f"|format(m.buy_in_amount) }} &middot; {{ m.predictions|length }} entered</div>
+      </div>
+      <div class="stack" style="flex-direction: row;">
+        <a class="btn secondary small" href="/admin/matches/{{ m.id }}/predictions">Predictions</a>
+        <a class="btn secondary small" href="/admin/matches/{{ m.id }}/qr">QR</a>
+        <a class="btn secondary small" href="/admin/matches/{{ m.id }}/edit">Edit</a>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">No upcoming matches yet.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Past Matches</h2>
+  {% if past %}
+    {% for m in past %}
+    {% set payout = get_payout_for_match(m.id) %}
+    <div class="match-row">
+      <div>
+        <div class="who">Springboks {{ m.bok_score }} - {{ m.opponent_score }} {{ m.opponent }}</div>
+        <div class="when">
+          {{ m.kickoff_at.strftime('%d %b %Y') }}
+          {% if payout %} &middot; <span class="badge win">Pot won: R{{ "%.2f"|format(payout.payout_total) }} ({{ payout.winners|length }} winner{{ 's' if payout.winners|length != 1 else '' }}, R{{ "%.2f"|format(payout.per_winner) }} each)</span>{% endif %}
+        </div>
+      </div>
+      <a class="btn secondary small" href="/admin/matches/{{ m.id }}/predictions">Predictions</a>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">No results entered yet.</p>
+  {% endif %}
+</div>
+{% endblock %}
