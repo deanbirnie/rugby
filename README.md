@@ -5,7 +5,7 @@ One shared pot carries over from match to match; whoever nails the exact
 score wins the whole thing and the pot resets. Built to be simple, low on
 personal data, and easy to self-host.
 
-- **Stack:** FastAPI + HTMX + Jinja2 templates + SQLite, no build step, no JS framework.
+- **Stack:** FastAPI + HTMX + Jinja2 templates + SQLite, no build step, no JS framework. Dependencies are managed with [uv](https://docs.astral.sh/uv/).
 - **No real accounts.** Predictors identify themselves with just a name and
   cellphone number (used only to recognise repeat predictors for the season
   leaderboard — never shown anywhere in the UI). Admin access is a single
@@ -68,14 +68,22 @@ personal data, and easy to self-host.
 3. Point your Cloudflare Tunnel at `http://localhost:8000` (or the container
    name `bokke-predictions` if the tunnel runs in the same Docker network).
 
-### Without Docker
+### Without Docker (local dev with uv)
+
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) if you
+don't have it, then:
 
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-export ADMIN_PASSWORD=... SESSION_SECRET=... PHONE_HASH_SECRET=... PHONE_ENCRYPTION_KEY=...
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+uv sync                      # create .venv and install the locked deps
+cp .env.example .env         # fill in secrets (see above)
+uv run --env-file .env uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
+
+`uv run` uses the project virtualenv, so you don't need to activate anything;
+`--env-file .env` loads your secrets into the process (in production these
+come from docker-compose's `env_file` instead). To add or change a dependency,
+run `uv add <package>` (or edit `pyproject.toml`) and commit the updated
+`uv.lock`.
 
 ## Using it
 
