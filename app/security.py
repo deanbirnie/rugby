@@ -1,3 +1,5 @@
+import base64
+import binascii
 import hashlib
 import hmac
 import re
@@ -53,13 +55,29 @@ def is_valid_sa_cell(normalized_phone: str) -> bool:
 @lru_cache
 def _fernet() -> Fernet:
     key = config.PHONE_ENCRYPTION_KEY
-    if not key:
+    if not key or key.strip() in ("", "change-me"):
         raise RuntimeError(
-            "PHONE_ENCRYPTION_KEY is not set. Generate one with:\n"
-            '  python -c "from cryptography.fernet import Fernet; '
-            'print(Fernet.generate_key().decode())"'
+            "PHONE_ENCRYPTION_KEY is not set (or still the change-me "
+            "placeholder). Set it to any long random string in .env, e.g.:\n"
+            '  python3 -c "import secrets; print(secrets.token_hex(32))"'
         )
-    return Fernet(key.encode() if isinstance(key, str) else key)
+    raw = key.encode() if isinstance(key, str) else key
+    try:
+        # A literal Fernet key (output of Fernet.generate_key()) is used
+        # as-is, so existing deployments keep decrypting their data.
+        return Fernet(raw)
+    except (ValueError, binascii.Error):
+        # Anything else is treated as a passphrase and deterministically
+        # stretched into a Fernet key, so any random string works.
+        return Fernet(base64.urlsafe_b64encode(hashlib.sha256(raw).digest()))
+
+
+def ensure_crypto_ready() -> None:
+    """Called at startup so a missing/placeholder PHONE_ENCRYPTION_KEY stops
+    the app from booting with a clear message, instead of surfacing as a 500
+    the first time someone submits a prediction.
+    """
+    _fernet()
 
 
 def hash_phone(normalized_phone: str) -> str:

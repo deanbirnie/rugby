@@ -41,13 +41,16 @@ personal data, and easy to self-host.
    cp .env.example .env
    ```
 
-   Generate the three secrets it asks for:
+   Generate the three secrets it asks for (run this once per secret):
 
    ```bash
-   python3 -c "import secrets; print(secrets.token_hex(32))"   # SESSION_SECRET
-   python3 -c "import secrets; print(secrets.token_hex(32))"   # PHONE_HASH_SECRET
-   python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"  # PHONE_ENCRYPTION_KEY
+   python3 -c "import secrets; print(secrets.token_hex(32))"   # SESSION_SECRET, PHONE_HASH_SECRET, PHONE_ENCRYPTION_KEY
    ```
+
+   Any long random string works for all three. The app refuses to start
+   while `PHONE_ENCRYPTION_KEY` is missing or still `change-me`, so a
+   misconfigured deployment fails at boot rather than when your first
+   friend tries to submit a prediction.
 
    Set `ADMIN_PASSWORD` to whatever you like — it doesn't need to be
    fancy, this app isn't protecting anything sensitive. `APP_TIMEZONE`
