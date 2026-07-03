@@ -9,11 +9,12 @@ from starlette.middleware.sessions import SessionMiddleware
 from app import config
 from app.database import init_db
 from app.routers import admin, predict, public
-from app.security import NotAuthenticated
+from app.security import NotAuthenticated, ensure_crypto_ready
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    ensure_crypto_ready()
     init_db()
     yield
 
