@@ -68,25 +68,48 @@ def matches_list(request: Request, tab: str = "upcoming", db: Session = Depends(
     )
 
 
+def _match_predictions(match: Match) -> list:
+    """Public prediction list: closest-first once resolved, otherwise in
+    submission order so the table reads like a live feed.
+    """
+    if match.is_resolved:
+        return closest_predictions(match)
+    return sorted(match.predictions, key=lambda p: p.submitted_at)
+
+
 @router.get("/matches/{match_id}", response_class=HTMLResponse)
 def match_detail(match_id: int, request: Request, db: Session = Depends(get_db)):
     match = db.get(Match, match_id)
     if match is None:
         return HTMLResponse("Match not found", status_code=404)
 
-    predictions = closest_predictions(match) if match.is_resolved else []
     payout = get_payout_for_match(db, match.id) if match.is_resolved else None
-    entry_count = len(match.predictions)
 
     return templates.TemplateResponse(
         request,
         "match_detail.html",
         {
             "match": match,
-            "predictions": predictions,
+            "predictions": _match_predictions(match),
             "payout": payout,
-            "entry_count": entry_count,
+            "entry_count": len(match.predictions),
         },
+    )
+
+
+@router.get("/matches/{match_id}/predictions-table", response_class=HTMLResponse)
+def match_predictions_table(match_id: int, request: Request, db: Session = Depends(get_db)):
+    """htmx polling target so the predictions list updates live while
+    predictions are still coming in.
+    """
+    match = db.get(Match, match_id)
+    if match is None:
+        return HTMLResponse("Match not found", status_code=404)
+
+    return templates.TemplateResponse(
+        request,
+        "_predictions_table.html",
+        {"match": match, "predictions": _match_predictions(match)},
     )
 
 

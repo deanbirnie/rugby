@@ -1,0 +1,38 @@
+<div id="predictions-table"
+  {% if not match.is_locked %}
+  hx-get="/matches/{{ match.id }}/predictions-table"
+  hx-trigger="every 15s"
+  hx-swap="outerHTML"
+  {% endif %}
+>
+  {% if predictions %}
+  <table>
+    <thead>
+      <tr>
+        <th>Predictor</th>
+        <th>Prediction</th>
+        {% if match.is_resolved %}<th>Off by</th><th></th>{% else %}<th>Submitted</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in predictions %}
+      <tr class="{{ 'winner-row' if p.is_winner else '' }}">
+        <td>{{ p.player.display_name }}</td>
+        <td>{{ p.predicted_bok_score }} - {{ p.predicted_opponent_score }}</td>
+        {% if match.is_resolved %}
+        <td>{{ p.diff }}</td>
+        <td>
+          {% if p.is_winner %}<span class="badge win">Winner!</span>
+          {% elif loop.first %}<span class="badge open">Closest</span>{% endif %}
+        </td>
+        {% else %}
+        <td class="muted">{{ p.submitted_at.strftime('%d %b, %H:%M') }}</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">No predictions yet — be the first!</p>
+  {% endif %}
+</div>

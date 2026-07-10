@@ -153,8 +153,10 @@ run `uv add <package>` (or edit `pyproject.toml`) and commit the updated
    automatically flagged as a winner, the payout split is shown (admin-only),
    and the pot resets for the next match.
 7. The public site (`/`, `/matches`, `/leaderboard`) shows the running pot,
-   upcoming fixtures, past results with who was closest, and season-long
-   standings — with no dollar figures beyond the current pot total.
+   upcoming fixtures, everyone's predictions for each match (updating live
+   while predictions are open), past results with who was closest, and
+   season-long standings — with no money figures beyond the current pot
+   total (who's paid and payout splits stay admin-only).
 
 ## Recovering a phone number
 
