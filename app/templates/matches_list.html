@@ -19,11 +19,14 @@
         </div>
       </div>
       {% if tab == 'upcoming' %}
-        {% if m.is_locked %}
-          <span class="badge locked">Closed</span>
-        {% else %}
-          <a class="btn gold small" href="/predict/{{ m.qr_token }}">Predict</a>
-        {% endif %}
+        <div class="stack" style="flex-direction: row;">
+          {% if m.is_locked %}
+            <span class="badge locked">Closed</span>
+          {% else %}
+            <a class="btn gold small" href="/predict/{{ m.qr_token }}">Predict</a>
+          {% endif %}
+          <a class="btn secondary small" href="/matches/{{ m.id }}">View</a>
+        </div>
       {% else %}
         <a class="btn secondary small" href="/matches/{{ m.id }}">View</a>
       {% endif %}

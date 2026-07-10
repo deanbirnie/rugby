@@ -15,22 +15,7 @@
 
   <div class="card">
     <h2>Predictions &mdash; Closest First</h2>
-    <table>
-      <thead><tr><th>Predictor</th><th>Prediction</th><th>Off by</th><th></th></tr></thead>
-      <tbody>
-        {% for p in predictions %}
-        <tr class="{{ 'winner-row' if p.is_winner else '' }}">
-          <td>{{ p.player.display_name }}</td>
-          <td>{{ p.predicted_bok_score }} - {{ p.predicted_opponent_score }}</td>
-          <td>{{ p.diff }}</td>
-          <td>
-            {% if p.is_winner %}<span class="badge win">Winner!</span>
-            {% elif loop.first %}<span class="badge open">Closest</span>{% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    {% include "_predictions_table.html" %}
   </div>
 {% else %}
   <div class="card">
@@ -42,7 +27,11 @@
     <p class="muted">{{ entry_count }} prediction{{ 's' if entry_count != 1 else '' }} so far
       {% if match.buy_in_amount %} &middot; Buy-in R{{ "%.2f"|format(match.buy_in_amount) }}{% endif %}
     </p>
-    <p class="muted">Other people's predictions are kept under wraps until the match is played.</p>
+  </div>
+
+  <div class="card">
+    <h2>Predictions So Far</h2>
+    {% include "_predictions_table.html" %}
   </div>
 {% endif %}
 {% endblock %}
