@@ -158,37 +158,66 @@ run `uv add <package>` (or edit `pyproject.toml`) and commit the updated
    season-long standings — with no money figures beyond the current pot
    total (who's paid and payout splits stay admin-only).
 
-## Managing players (from inside the container)
+## Maintenance scripts
 
-Phone numbers are stored encrypted and are never decrypted by the running
-web app — there's no admin page for them, by design: the web admin sits
-behind one shared password, while these scripts require access to the
-server itself. Run them inside the container, which has the app's secrets.
+Everything in `scripts/` is an admin tool that runs **inside the container**
+(`docker exec`), not through the website. That's deliberate: phone numbers
+are stored encrypted and are never decrypted by the running web app — the
+web admin sits behind one shared password, while these scripts require
+access to the server itself, a much stronger gate. The container already
+has the app's secrets and database, so no extra setup is needed.
 
-**See everyone** (ids, names, numbers, prediction/paid/win counts):
+| Script | What it does |
+|---|---|
+| `scripts/list_players.py` | List every player: id, name, decrypted number, prediction/paid/win counts, first-seen date |
+| `scripts/decrypt_phone.py` | Look up one person's number by (partial) name |
+| `scripts/merge_players.py` | Fold a duplicate account into the real one (dry-run by default) |
+
+### List all players
+
+The starting point for any player admin — shows the ids the other scripts
+need:
 
 ```bash
 docker exec -it bokke-predictions python scripts/list_players.py
 ```
 
-**Look up one person's number** (e.g. to chase a buy-in):
+### Look up one person's number
+
+E.g. to chase a buy-in:
 
 ```bash
 docker exec -it bokke-predictions python scripts/decrypt_phone.py "Dean Birnie"
 ```
 
-**Merge a duplicate account.** If someone typos their number at the phone
-step they won't be recognised and will end up with a second account. Find
-both ids with `list_players.py`, then merge the typo'd account into the
-real one (the first id survives, keeping its name and number; all
-predictions move across; if both predicted the same match the most
-recently updated prediction wins and counts as paid if either was):
+Matches partial names, case-insensitively.
+
+### Merge a duplicate account
+
+If someone typos their number at the phone step they won't be recognised
+and will end up with a second account splitting their season history (the
+tell: a regular gets the "First time? Welcome!" screen). Find both ids
+with `list_players.py`, then merge the typo'd account into the real one.
+Accounts are picked purely by id, so identical display names are fine.
+
+The **first** id survives, keeping its name and (correct) number; all
+predictions move across; the duplicate account and its number are
+deleted. If both accounts predicted the same match, the most recently
+updated prediction wins, and it counts as paid if either was.
 
 ```bash
-# preview first (writes nothing):
+# preview first (writes nothing, shows exactly what would happen):
 docker exec -it bokke-predictions python scripts/merge_players.py 3 7
 # then apply:
 docker exec -it bokke-predictions python scripts/merge_players.py 3 7 --yes
+```
+
+### Running them without Docker
+
+For a local (uv) setup, run any script with the same `.env` the app uses:
+
+```bash
+uv run --env-file .env python scripts/list_players.py
 ```
 
 ## Data model notes
