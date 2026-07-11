@@ -158,16 +158,37 @@ run `uv add <package>` (or edit `pyproject.toml`) and commit the updated
    season-long standings — with no money figures beyond the current pot
    total (who's paid and payout splits stay admin-only).
 
-## Recovering a phone number
+## Managing players (from inside the container)
 
 Phone numbers are stored encrypted and are never decrypted by the running
-web app — there's no admin page for it, by design, to keep the attack
-surface small. If you ever genuinely need to see one (e.g. to chase someone
-for a buy-in), run this against the container with the same
-`PHONE_ENCRYPTION_KEY` the app is using:
+web app — there's no admin page for them, by design: the web admin sits
+behind one shared password, while these scripts require access to the
+server itself. Run them inside the container, which has the app's secrets.
+
+**See everyone** (ids, names, numbers, prediction/paid/win counts):
+
+```bash
+docker exec -it bokke-predictions python scripts/list_players.py
+```
+
+**Look up one person's number** (e.g. to chase a buy-in):
 
 ```bash
 docker exec -it bokke-predictions python scripts/decrypt_phone.py "Dean Birnie"
+```
+
+**Merge a duplicate account.** If someone typos their number at the phone
+step they won't be recognised and will end up with a second account. Find
+both ids with `list_players.py`, then merge the typo'd account into the
+real one (the first id survives, keeping its name and number; all
+predictions move across; if both predicted the same match the most
+recently updated prediction wins and counts as paid if either was):
+
+```bash
+# preview first (writes nothing):
+docker exec -it bokke-predictions python scripts/merge_players.py 3 7
+# then apply:
+docker exec -it bokke-predictions python scripts/merge_players.py 3 7 --yes
 ```
 
 ## Data model notes
