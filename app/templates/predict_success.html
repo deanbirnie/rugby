@@ -5,7 +5,6 @@
   <h1>Prediction locked in! &#127937;</h1>
   {% if prediction %}
     <p>You predicted <strong>Springboks {{ prediction.predicted_bok_score }} - {{ prediction.predicted_opponent_score }} {{ match.opponent }}</strong></p>
-    <p class="muted">{{ 'Marked as paid.' if prediction.paid else 'Remember to settle your buy-in before kickoff.' }}</p>
   {% endif %}
   <div class="pot-hero" style="margin-top:1.2rem;">
     <div class="pot-label">Current Pot</div>

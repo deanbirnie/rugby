@@ -111,7 +111,6 @@ def predict_submit(
     bok_score: int = Form(...),
     opponent_score: int = Form(...),
     name: str = Form(""),
-    paid_now: bool = Form(False),
     db: Session = Depends(get_db),
 ):
     match = _get_match_or_404(db, qr_token)
@@ -159,8 +158,6 @@ def predict_submit(
 
         prediction.predicted_bok_score = bok_score
         prediction.predicted_opponent_score = opponent_score
-        if paid_now:
-            prediction.paid = True
         db.commit()
 
     try:

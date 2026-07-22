@@ -15,6 +15,13 @@
 {% endif %}
 
 <div class="card">
+  {% set total = predictions|length %}
+  <p class="muted">
+    <strong>{{ match.paid_count }} / {{ total }}</strong> paid
+    &middot; Collected R{{ "%.2f"|format(match.buy_in_amount * match.paid_count) }}
+    {% if match.amount_outstanding %}&middot; <span style="color:var(--bok-danger);">Outstanding R{{ "%.2f"|format(match.amount_outstanding) }}</span>{% endif %}
+    <br><span style="font-size:0.85rem;">Every prediction is in the pot regardless of paid status &mdash; this is just to track who still owes. Admin-only.</span>
+  </p>
   <table>
     <thead>
       <tr>

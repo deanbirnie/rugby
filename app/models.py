@@ -75,9 +75,20 @@ class Match(Base):
         return self.is_resolved and any(p.is_winner for p in self.predictions)
 
     @property
-    def paid_contribution(self) -> float:
-        paid_count = sum(1 for p in self.predictions if p.paid)
-        return float(self.buy_in_amount) * paid_count
+    def pot_contribution(self) -> float:
+        """Every prediction adds its buy-in to the pot, whether or not the
+        cash has been handed over yet (paid is admin bookkeeping only)."""
+        return float(self.buy_in_amount) * len(self.predictions)
+
+    @property
+    def paid_count(self) -> int:
+        return sum(1 for p in self.predictions if p.paid)
+
+    @property
+    def amount_outstanding(self) -> float:
+        """Buy-in cash still owed to the pot — admin bookkeeping only."""
+        unpaid = len(self.predictions) - self.paid_count
+        return float(self.buy_in_amount) * unpaid
 
 
 class Prediction(Base):
