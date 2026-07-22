@@ -35,7 +35,7 @@ def compute_pot_timeline(db: Session):
     payouts: dict[int, dict | None] = {}
 
     for match in matches:
-        running += match.paid_contribution
+        running += match.pot_contribution
         winners = [p for p in match.predictions if p.is_winner]
         if winners:
             payouts[match.id] = {

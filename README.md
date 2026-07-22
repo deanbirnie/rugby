@@ -16,8 +16,10 @@ personal data, and easy to self-host.
 ## How it works
 
 - **The pot** carries forward across matches. The admin sets a buy-in amount
-  per match; every predictor who pays that buy-in (ticked at prediction time,
-  or marked paid later by the admin) adds to the pot.
+  per match, and every prediction adds that buy-in to the pot — no separate
+  "have you paid" step for predictors. Whether the cash has actually been
+  handed over is tracked separately by the admin (see below) and never
+  affects the pot total.
 - **Winning** requires an *exact* score match (both team scores correct). If
   more than one person nails it, the pot splits evenly between them and all
   are recorded as winners. The pot then resets to zero for the next match.
@@ -145,10 +147,12 @@ run `uv add <package>` (or edit `pyproject.toml`) and commit the updated
 4. People scan the QR and enter their cellphone number (0- and +27-style
    numbers are treated as the same). If the number is recognised they're
    greeted by name and go straight to their prediction — first-timers are
-   asked for their name once. Then they enter their score and optionally
-   tick "I'm paying now".
-5. Before or after the match, use **Predictions** on the match to tick off
-   who's paid, if they didn't pay at prediction time.
+   asked for their name once. Then they enter their score. Every prediction
+   is in the pot automatically; predictors never see anything about payment.
+5. Whenever cash changes hands, open **Predictions** on the match and tick
+   people off as paid. This is purely your own record of who still owes —
+   it never changes the pot and is never shown to predictors. The page
+   shows a running "X / Y paid · Collected / Outstanding" summary.
 6. After the match, enter the final score. Anyone with an exact match is
    automatically flagged as a winner, the payout split is shown (admin-only),
    and the pot resets for the next match.
